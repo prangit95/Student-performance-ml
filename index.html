@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Performance Prediction</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">◈</span>
+        <div>
+          <div class="logo-title">GradeML</div>
+          <div class="logo-sub">Student Performance Prediction</div>
+        </div>
+      </div>
+      <nav class="main-nav">
+        <button class="nav-btn active" data-tab="predict">Predict</button>
+        <button class="nav-btn" data-tab="dataset">Dataset</button>
+        <button class="nav-btn" data-tab="model">Model</button>
+        <button class="nav-btn" data-tab="about">About</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ── Main ── -->
+  <main class="main-content">
+
+    <!-- PREDICT TAB -->
+    <section class="tab-panel active" id="tab-predict">
+      <div class="section-intro">
+        <h1 class="section-title">Predict Performance</h1>
+        <p class="section-desc">Adjust the student profile below. The model updates in real time.</p>
+      </div>
+
+      <div class="predict-layout">
+
+        <!-- Left: Inputs -->
+        <div class="inputs-col">
+          <div class="input-card">
+            <div class="card-label">Academic</div>
+
+            <div class="field-group">
+              <label>Study Time <span class="unit">hrs/week</span></label>
+              <div class="slider-row">
+                <input type="range" id="study" min="1" max="40" value="14" />
+                <output id="study-out">14</output>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label>Attendance Rate <span class="unit">%</span></label>
+              <div class="slider-row">
+                <input type="range" id="attend" min="50" max="100" value="80" />
+                <output id="attend-out">80</output>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label>Previous GPA <span class="unit">/ 4.0</span></label>
+              <div class="slider-row">
+                <input type="range" id="gpa" min="1" max="4" step="0.1" value="2.8" />
+                <output id="gpa-out">2.8</output>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label>Assignments Completed <span class="unit">%</span></label>
+              <div class="slider-row">
+                <input type="range" id="assign" min="0" max="100" value="75" />
+                <output id="assign-out">75</output>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label>Absences <span class="unit">per term</span></label>
+              <div class="slider-row">
+                <input type="range" id="absences" min="0" max="20" value="4" />
+                <output id="absences-out">4</output>
+              </div>
+            </div>
+          </div>
+
+          <div class="input-card">
+            <div class="card-label">Personal &amp; Social</div>
+
+            <div class="field-group">
+              <label>Sleep Hours <span class="unit">per night</span></label>
+              <div class="slider-row">
+                <input type="range" id="sleep" min="3" max="10" value="7" />
+                <output id="sleep-out">7</output>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label>Parental Education</label>
+              <select id="parent">
+                <option value="1">No formal education</option>
+                <option value="2">High school</option>
+                <option value="3" selected>Bachelor's degree</option>
+                <option value="4">Master's or above</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label>Internet Access</label>
+              <select id="internet">
+                <option value="1" selected>Yes</option>
+                <option value="0">No</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label>Tutoring</label>
+              <select id="tutoring">
+                <option value="1" selected>Yes</option>
+                <option value="0">No</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label>Extra-curricular Activities</label>
+              <select id="extra">
+                <option value="0">None</option>
+                <option value="1" selected>1–2 per week</option>
+                <option value="2">3+ per week</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label>Part-time Job</label>
+              <select id="job">
+                <option value="0" selected>No</option>
+                <option value="1">Yes</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Result -->
+        <div class="result-col">
+          <div class="result-card">
+            <div class="result-label">Predicted Score</div>
+            <div class="result-score" id="result-score">—</div>
+            <div class="result-grade" id="result-grade"></div>
+            <canvas id="gaugeChart" width="260" height="140"></canvas>
+            <p class="result-advice" id="result-advice"></p>
+          </div>
+
+          <div class="impact-card">
+            <div class="card-label">Feature Impact</div>
+            <div id="impact-list"></div>
+          </div>
+
+          <div class="engineered-card">
+            <div class="card-label">Derived Metrics</div>
+            <div class="derived-grid" id="derived-grid"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DATASET TAB -->
+    <section class="tab-panel" id="tab-dataset">
+      <div class="section-intro">
+        <h1 class="section-title">Dataset Overview</h1>
+        <p class="section-desc">1,287 student records · 15 input features · synthetic data mirroring real-world distributions.</p>
+      </div>
+
+      <div class="stats-strip">
+        <div class="stat-tile"><span class="stat-num">1,287</span><span class="stat-lbl">Students</span></div>
+        <div class="stat-tile"><span class="stat-num">15</span><span class="stat-lbl">Features</span></div>
+        <div class="stat-tile"><span class="stat-num">68.4</span><span class="stat-lbl">Mean Score</span></div>
+        <div class="stat-tile"><span class="stat-num">79%</span><span class="stat-lbl">Pass Rate</span></div>
+        <div class="stat-tile"><span class="stat-num">4</span><span class="stat-lbl">Grade Classes</span></div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="card-label">Score Distribution</div>
+          <div class="chart-wrap"><canvas id="distChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="card-label">Grade Breakdown</div>
+          <div class="chart-wrap"><canvas id="gradeChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="card-label">Sample Records</div>
+        <div class="table-scroll">
+          <table id="sample-table">
+            <thead>
+              <tr>
+                <th>ID</th><th>Study Hrs</th><th>Attendance</th>
+                <th>Prev GPA</th><th>Sleep</th><th>Assignments</th>
+                <th>Absences</th><th>Score</th><th>Grade</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODEL TAB -->
+    <section class="tab-panel" id="tab-model">
+      <div class="section-intro">
+        <h1 class="section-title">Model Performance</h1>
+        <p class="section-desc">6 classifiers tuned via GridSearchCV · 5-fold cross-validation · 80/20 train-test split.</p>
+      </div>
+
+      <div class="model-top-grid">
+        <div class="metric-card highlight">
+          <div class="metric-val">92.5%</div>
+          <div class="metric-lbl">Accuracy</div>
+          <div class="metric-sub">Random Forest</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val">0.913</div>
+          <div class="metric-lbl">F1 Score</div>
+          <div class="metric-sub">weighted avg</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val">0.921</div>
+          <div class="metric-lbl">Precision</div>
+          <div class="metric-sub">weighted avg</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val">0.908</div>
+          <div class="metric-lbl">Recall</div>
+          <div class="metric-sub">weighted avg</div>
+        </div>
+      </div>
+
+      <div class="model-mid-grid">
+        <div class="chart-card wide">
+          <div class="card-label">Algorithm Comparison — Test Accuracy</div>
+          <div class="chart-wrap tall"><canvas id="algoChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="card-label">Feature Importance</div>
+          <div class="chart-wrap tall"><canvas id="featChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="cm-card">
+        <div class="card-label">Confusion Matrix — Random Forest (best)</div>
+        <div class="cm-grid" id="cm-grid"></div>
+        <div class="cm-legend">
+          <span class="cm-key correct"></span> Correct &nbsp;&nbsp;
+          <span class="cm-key wrong"></span> Misclassified
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT TAB -->
+    <section class="tab-panel" id="tab-about">
+      <div class="section-intro">
+        <h1 class="section-title">About This Project</h1>
+        <p class="section-desc">End-to-end machine learning pipeline for predicting academic outcomes.</p>
+      </div>
+
+      <div class="about-grid">
+        <div class="about-card">
+          <div class="about-icon">⬡</div>
+          <h3>Pipeline</h3>
+          <p>Data generation → cleaning → feature engineering → GridSearchCV tuning → evaluation. Run end-to-end with <code>python main.py</code>.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">◈</div>
+          <h3>Models</h3>
+          <p>Six classifiers compete: Random Forest, Gradient Boosting, SVM, KNN, Decision Tree, Logistic Regression. Best model is saved automatically.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">◇</div>
+          <h3>Features</h3>
+          <p>15 raw input features + 4 engineered features: study efficiency, sleep optimality, effort score, and parental support index.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">○</div>
+          <h3>Stack</h3>
+          <p>Python · scikit-learn · pandas · NumPy · matplotlib · joblib. Frontend: vanilla HTML/CSS/JS + Chart.js.</p>
+        </div>
+      </div>
+
+      <div class="file-tree-card">
+        <div class="card-label">Project Structure</div>
+        <pre class="file-tree">student_performance/
+├── data/
+│   ├── __init__.py
+│   └── generate_dataset.py    ← synthetic 1,287-row dataset
+├── models/                    ← saved .pkl artifacts
+├── outputs/                   ← evaluation plots (.png)
+├── frontend/
+│   ├── index.html             ← this file
+│   ├── style.css
+│   └── app.js
+├── preprocessing.py           ← clean · engineer · split
+├── train_models.py            ← GridSearchCV across 6 models
+├── evaluate.py                ← plots: ROC, CM, learning curve
+├── predict.py                 ← single & batch inference
+├── main.py                    ← full pipeline runner
+└── requirements.txt</pre>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>GradeML · Student Performance Prediction · Built with scikit-learn</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
